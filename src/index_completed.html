@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Greetings Smart Contract</title>
+
+    <link rel="stylesheet" type="text/css" href="main.css">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="./node_modules/web3/dist/web3.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+	<script src="js/analytics.js"></script>
+
+</head>
+<body>
+    <div class="container">
+
+        <h1>Greetings</h1>  Developer: <a href="mailto:Kenneth.hu@hotmail.com"> Kenneth</a> <br>
+        <span id="countIns">WebSite: <a href="http://sgblockchain.sg/"> Singapore blockchain</a></span>
+
+      
+        <hr>
+
+        <img id="loader" src="https://loading.io/spinners/double-ring/lg.double-ring-spinner.gif">
+        <div class="form-group">
+            <label for="Greeting" class="col-lg-2 control-label">Set Greeting</label>
+            <input id="Greeting" type="text">
+        </div>
+
+       <div class="form-group btn-group">
+            
+        <button id="SetGreetings"  class="btn btn-primary">Set Greetings</button>
+        <button id="getGreetings"  class="btn btn-primary">get Greetings</button>
+        <button id="Clear"  class="btn btn-primary">Clear</button>
+       </div>
+      
+       
+        <div class="form-group">
+            <label for="lDisplayGreetings" class="col-lg-2 control-label">Display Greetings</label>
+            <input id="DisplayGreetings" type="text">
+        </div>
+		 <div class="form-group">
+			<h3>Result : </h3>
+            <div id="Result">
+                    
+                   </div>
+        </div>
+		
+		 <div class="form-group">
+			<h3>Transaction : </h3>
+                    <ul id="transaction"></ul>
+
+        </div>
+    </div>
+
+  
+
+    <script>
+       if (typeof web3 !== 'undefined') {
+           web3 = new Web3(web3.currentProvider);
+       } else {
+           web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+       }
+
+       web3.eth.defaultAccount = web3.eth.accounts[0];
+
+       var GreetingsContract = web3.eth.contract([{"constant":false,"inputs":[{"name":"_message","type":"string"}],"name":"setGreetings","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"getGreetings","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[],"payable":false,"stateMutability":"nonpayable","type":"constructor"}]);
+       var Greetings = GreetingsContract.at('0x71605366453742cb11ae1c00c66067bf179caf8f');
+  
+       
+
+       $("#getGreetings").click(function() {
+            $("#loader").show();
+
+            Greetings.getGreetings( (err, res) => {
+                if (err) {
+                    $("#loader").hide();
+                    $("#Result").html(err);
+					return;
+                }
+                console.log(res);
+                $("#DisplayGreetings").val(res);
+                $("#Result").html('get greetings successfully');
+                $("#loader").hide();
+				
+            });
+        });
+
+        $("#SetGreetings").click(function() {
+            $("#loader").show();
+
+            Greetings.setGreetings($("#Greeting").val(), (err, res) => {
+                if (err) {
+                    $("#loader").hide();
+                    
+                    $("#Result").html(err);
+					return;
+                }
+                console.log(res);
+                $("#Result").html('set greetings successfully');
+                $("#loader").hide();
+				addTransaction(res);
+            });
+        });
+        $("#Clear").click(function() {
+            $("#loader").show();
+            $("#DisplayGreetings").val('');
+            $("#Result").html('');
+            
+			
+        });
+		
+		function addTransaction(address){
+			var newDate = new Date();
+			var datetime = "transaction time: " + newDate.toLocaleString() +" transaction ID : ";
+		    var ul = document.getElementById("transaction");
+		    var li = document.createElement("li");
+		    var link = document.createElement("a");
+		    var createAText = document.createTextNode(datetime + address);
+				link.setAttribute('href', "https://rinkeby.etherscan.io/tx/"+ address);
+				link.setAttribute('target','_blank');
+				link.appendChild(createAText);
+				li.appendChild(link);
+				ul.appendChild(li);
+
+		}
+    </script>
+
+</body>
+</html>
